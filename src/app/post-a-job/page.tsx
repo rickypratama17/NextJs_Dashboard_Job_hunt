@@ -1,7 +1,7 @@
 "use client";
 import { JobFormSchema } from "@/lib/form-shcema";
 import { zodResolver } from "@hookform/resolvers/zod";
-import React, {FC} from "react";
+import React, {FC, useEffect, useState} from "react";
 import { useForm } from "react-hook-form";
 import { Form, FormDescription, FormLabel } from "@/components/ui/form";
 import { ArrowLeftIcon } from "lucide-react";
@@ -20,22 +20,31 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
+import InputSkills from "@/components/organism/InputSkills";
+import CKEditor from "@/components/organism/CKEditor";
+import InputBenefits from "@/components/organism/InputBenefit";
+import { Button } from "@/components/ui/button";
 
 interface PostJobPageProps{
 
 }
 const PostJobPage: FC<PostJobPageProps>= ({}) => {
+    const [editorLoaded, setEditorLoaded] = useState<boolean>(false);
 
     const form = useForm<z.infer<typeof JobFormSchema>>({
         resolver: zodResolver(JobFormSchema),
         defaultValues: {
-            requiredSklils: []
+            requiredSkills: []
         }
     })
 
     const onSubmit = (val: z.infer<typeof JobFormSchema>) => {
         console.log(val)
     }
+
+    useEffect(() => {
+        setEditorLoaded(true)
+    },  [])
 
     return(
         <div>
@@ -72,19 +81,40 @@ const PostJobPage: FC<PostJobPageProps>= ({}) => {
                     </FieldInput>
                     
                     <FieldInput title="Type of Employement" subtitle=" You can select multiple type of employment">
-                        <RadioGroup>
-                            {JOBTYPES.map(
-                                (item: string, i: number) => (
-                                <FormItem key={item + i} className="flex items-center gap-3">
-                                    <FormControl>
-                                        <RadioGroupItem value={item} />
-                                    </FormControl>
-                                    <FormLabel className="font-normal">
-                                        {item}
-                                    </FormLabel>
-                                </FormItem>
-                            ))}
-                        </RadioGroup>
+                        <FormField
+							control={form.control}
+							name="jobType"
+							render={({ field }) => (
+								<FormItem className="space-y-3">
+									<FormControl>
+										<RadioGroup
+											onValueChange={field.onChange}
+											defaultValue={field.value}
+											className="flex flex-col space-y-1"
+										>
+											{JOBTYPES.map(
+												(item: string, i: number) => (
+													<FormItem
+														key={item + i}
+														className="flex items-center space-x-3 space-y-0"
+													>
+														<FormControl>
+															<RadioGroupItem
+																value={item}
+															/>
+														</FormControl>
+														<FormLabel className="font-normal">
+															{item}
+														</FormLabel>
+													</FormItem>
+												)
+											)}
+										</RadioGroup>
+									</FormControl>
+									<FormMessage />
+								</FormItem>
+							)}
+						/>
                     </FieldInput>
 
                     <FieldInput title="Salary" subtitle="Please specify the estimated salary range for the role. *You can leave this blank">
@@ -142,7 +172,30 @@ const PostJobPage: FC<PostJobPageProps>= ({}) => {
                             />
                     </FieldInput>
 
-                    
+                    <FieldInput title="Required Skills" subtitle="Add reqired skills the job">
+                        <InputSkills form={form} />
+                    </FieldInput>
+
+                    <FieldInput title="Job Description" subtitle="Job title must be describe one position">
+                        <CKEditor form={form} name="jobDescription" editorLoaded={editorLoaded} />
+                    </FieldInput>
+                    <FieldInput title="Responsibilities" subtitle="Outline the core responsibilities of the position">
+                        <CKEditor form={form} name="responsibility" editorLoaded={editorLoaded} />
+                    </FieldInput>
+                    <FieldInput title="Who You Are" subtitle="Add your preferred candidates qualifications">
+                        <CKEditor form={form} name="whoYouAre" editorLoaded={editorLoaded} />
+                    </FieldInput>
+                    <FieldInput title="Nice-To-Have" subtitle="Add nice-to-have skill and qualification for the role to encourage a more diverse set of candidates">
+                        <CKEditor form={form} name="niceToHave" editorLoaded={editorLoaded} />
+                    </FieldInput>
+
+                    <FieldInput title="Perks and Benefits" subtitle="Encorage more people to apply by sharing the attractive rewards and benefits you offer your employees">
+                        <InputBenefits form={form} />
+                    </FieldInput>
+
+                    <div className=" flex justify-end">
+                        <Button size={'lg'}>Do a REview</Button>
+                    </div>
                 </form>
             </Form>
         </div>
